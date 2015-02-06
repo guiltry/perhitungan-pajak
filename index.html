@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
+  
+  <script>
+    angular.module('app', [])
+      .controller('PajakController', ['$scope', function($scope) {
+
+        $scope.ptkp_list = [
+          { name: 'TK/0', value: 24300000 }, 
+          { name: 'TK/1', value: 26325000 }, 
+        ];
+
+        $scope.npwp_list = {
+          true: [
+            { range: 50000000, value: 0.05 }, 
+            { range: 250000000, value: 0.15 },
+            { range: 500000000, value: 0.25 },
+            { range: 100000000000, value: 0.30 }
+          ],
+          false: [
+            { range: 50000000, value: 0.06 }, 
+            { range: 250000000, value: 0.18 },
+            { range: 500000000, value: 0.30 },
+            { range: 100000000000, value: 0.36 }
+          ]
+        };
+        
+        $scope.npwp = false;
+        $scope.ptkp = $scope.ptkp_list[0].value;
+
+        $scope.gaji = 0;
+        $scope.thr = 0;
+
+        $scope.gaji_per_tahun = function() {
+          return ($scope.gaji)*12;
+        }
+
+        $scope.bruto = function() {
+          return ($scope.gaji_per_tahun() + $scope.thr);
+        }
+
+        $scope.biaya_jabatan = function() {
+          var percent = $scope.gaji_per_tahun() * 0.05;
+          percent = ((percent > 6000000) ? 6000000 : percent);
+
+          return percent;
+        }
+
+        $scope.netto = function() {
+          return ($scope.bruto() - $scope.biaya_jabatan());
+        }
+
+        $scope.pkp = function() {
+          var pkp = ($scope.netto() - $scope.ptkp);
+          if (pkp < 0) pkp = 0;
+          return pkp;
+        }
+
+        $scope.pph_1 = function() {
+          var list = $scope.npwp_list[$scope.npwp];
+          var temp = $scope.pkp() - list[0].range;
+          var ret = 0;
+
+          if (temp > 0) {
+            ret = temp * list[0].value;
+          }
+          return ret;
+        }
+
+      }]);
+  </script>
+
+  <meta charset="UTF-8">
+  <title>Perhitungan Pajak</title>
+</head>
+<body>
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Perhitungan Pajak</a>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container" ng-controller="PajakController">
+    <div class="row">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label for="inputNPWP" class="control-label col-xs-2">NPWP</label>
+          <div class="col-sm-4">
+            <div class="checkbox">
+              <label><input type="checkbox" id="inputNPWP" ng-model="npwp"> Ada</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputGaji" class="control-label col-xs-2">Gaji</label>
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-addon">Rp.</div>
+              <input type="number" class="form-control" id="inputGaji" placeholder="Gaji" ng-model="gaji">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputTHR" class="control-label col-xs-2">THR</label>
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-addon">Rp.</div>
+              <input type="number" class="form-control" id="inputTHR" placeholder="THR" ng-model="thr">
+            </div>
+          </div>
+        </div>
+
+        <hr>
+        <h3>Rincian</h3>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">Gaji:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{gaji | currency:'':0}}</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">Gaji/Tahun:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{gaji_per_tahun() | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">THR:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{thr | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">Tanggungan:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{ptkp | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <hr>
+        <h3>Perhitungan:</h3>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">Bruto:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{bruto() | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">Biaya Jabatan:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{biaya_jabatan() | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">Netto:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{netto() | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">PTKP:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{ptkp | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">PKP:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{pkp() | currency:'':0}}</p>
+          </div>
+        </div>
+
+        <hr>
+        <h3>PPH Terhutang:</h3>
+
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-2 control-label">1:</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{pph_1() | currency:'':0}}</p>
+          </div>
+        </div>
+
+        {{npwp_list[npwp][0]}}
+
+      </form>
+    </div>
+  </div>
+</body>
+</html>
