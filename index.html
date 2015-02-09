@@ -9,36 +9,45 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.12/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.1.0/lodash.min.js"></script>
   
   <script>
     angular.module('app', [])
-      .controller('PajakController', ['$scope', function($scope) {
+      .controller('PajakController', ['$scope', '$filter', function($scope, $filter) {
 
         $scope.ptkp_list = [
-          { name: 'TK/0', value: 24300000 }, 
-          { name: 'TK/1', value: 26325000 }, 
+          { name: 'TK, Lajang (tidak menikah)', value: 24300000 },
+          { name: 'TK1, Lajang dengan 1 tanggungan', value: 26325000 },
+          { name: 'TK2, Lajang dengan 2 tanggungan', value: 28350000 },
+          { name: 'TK3, Lajang dengan 3 tanggungan', value: 30375000 },
+          { name: 'K, Menikah tanpa tanggungan', value: 26325000 },
+          { name: 'K1, Menikah dengan 1 tanggungan', value: 28350000 },
+          { name: 'K2, Menikah dengan 2 tanggungan', value: 30375000 },
+          { name: 'K3, Menikah dengan 3 tanggungan', value: 32400000 }
         ];
 
         $scope.npwp_list = {
           true: [
             { range: 50000000, value: 0.05 }, 
-            { range: 250000000, value: 0.15 },
-            { range: 500000000, value: 0.25 },
+            { range: 200000000, value: 0.15 },
+            { range: 250000000, value: 0.25 },
             { range: 100000000000, value: 0.30 }
           ],
           false: [
             { range: 50000000, value: 0.06 }, 
-            { range: 250000000, value: 0.18 },
-            { range: 500000000, value: 0.30 },
+            { range: 200000000, value: 0.18 },
+            { range: 250000000, value: 0.30 },
             { range: 100000000000, value: 0.36 }
           ]
         };
         
         $scope.npwp = false;
-        $scope.ptkp = $scope.ptkp_list[0].value;
+        $scope.ptkp = $scope.ptkp_list[0];
 
         $scope.gaji = 0;
         $scope.thr = 0;
+        
+        $scope.pph = [0, 0, 0, 0];
 
         $scope.gaji_per_tahun = function() {
           return ($scope.gaji)*12;
@@ -60,24 +69,87 @@
         }
 
         $scope.pkp = function() {
-          var pkp = ($scope.netto() - $scope.ptkp);
+          var pkp = ($scope.netto() - $scope.ptkp.value);
           if (pkp < 0) pkp = 0;
           return pkp;
         }
 
-        $scope.pph_1 = function() {
-          var list = $scope.npwp_list[$scope.npwp];
-          var temp = $scope.pkp() - list[0].range;
-          var ret = 0;
+        $scope.count_pph = function(i, amount, list) {
+          if (i >= $scope.pph.length) return;
 
-          if (temp > 0) {
-            ret = temp * list[0].value;
+          var again = true;
+          var temp = 0;
+          
+          if (amount < list[i].range) {
+            temp = amount;
+            again = false
+          } else {
+            temp = list[i].range;
           }
-          return ret;
+
+          $scope.pph[i] = temp * list[i].value;
+
+          if (again) {
+            $scope.count_pph(i + 1, amount - list[i].range, list);
+          } else {
+            $scope.count_pph(i + 1, 0, list);
+          }
         }
 
+        $scope.total_pph = function() {
+          return _.reduce($scope.pph, function(sum, n) { return sum + n; });
+        }
+
+        $scope.total_pph_per_bulan = function() {
+          return $scope.total_pph() / 12;
+        }
+
+        $scope.total_gaji = function() {
+          return $scope.netto() - $scope.total_pph();
+        }
+
+        $scope.total_gaji_per_bulan = function() {
+          return $scope.total_gaji() / 12;
+        }
+
+        $scope.ratio = function() {
+          var percent = ($scope.total_pph_per_bulan() / $scope.total_gaji_per_bulan()) * 100;
+
+          if ($scope.total_gaji_per_bulan() <= 0) {
+            percent = 0;
+          } else {
+            percent = $filter('number')(percent, 2);
+          }
+
+          return percent + ' %';
+        }
+
+        $scope.$watch('gaji', function() {
+          $scope.count_pph(0, $scope.pkp(), $scope.npwp_list[$scope.npwp]);
+        });
+
+        $scope.$watch('thr', function() {
+          $scope.count_pph(0, $scope.pkp(), $scope.npwp_list[$scope.npwp]);
+        });
+
+        $scope.$watch('npwp', function() {
+          $scope.count_pph(0, $scope.pkp(), $scope.npwp_list[$scope.npwp]);
+        });
+
+        $scope.$watch('ptkp', function() {
+          $scope.count_pph(0, $scope.pkp(), $scope.npwp_list[$scope.npwp]);
+        });
       }]);
+    $(function () {
+      $('i').tooltip();
+    })
   </script>
+
+  <style>
+    .tooltip-inner {
+      max-width: 450px;
+    }
+  </style>
 
   <meta charset="UTF-8">
   <title>Perhitungan Pajak</title>
@@ -97,117 +169,199 @@
       </div>
     </div>
   </nav>
+
+  <a href="https://github.com/ReformasiBirokrasi/Perhitungan-Pajak" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
   
   <div class="container" ng-controller="PajakController">
     <div class="row">
       <form class="form-horizontal">
-        <div class="form-group">
-          <label for="inputNPWP" class="control-label col-xs-2">NPWP</label>
-          <div class="col-sm-4">
-            <div class="checkbox">
-              <label><input type="checkbox" id="inputNPWP" ng-model="npwp"> Ada</label>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="inputNPWP" class="control-label col-xs-4">NPWP
+              <i class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" data-html=true data-container="body"
+                title="
+                <h5>Sesuai dengan Pasal 17 ayat 1 huruf a, UU Pajak Penghasilan.</h5>
+                <br>
+                sampai dengan 50 Juta = 5%
+                <br>
+                diatas Rp 50 juta sampai dengan Rp 250 juta = 15%
+                <br>
+                diatas Rp 250 juta sampai dengan Rp 500 juta = 25%
+                <br>
+                diatas Rp 500 juta = 30%
+                <br>
+                <br>
+                <small>*) Bagi Wajib Pajak yang tidak memiliki NPWP dikenakan tarif 20 % lebih tinggi dari tarif PPh Pasal 17.</small>
+                "></i>
+            </label>
+            <div class="col-sm-8">
+              <div class="checkbox">
+                <label><input type="checkbox" id="inputNPWP" ng-model="npwp"> Ada</label>
+              </div>
             </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="inputGaji" class="control-label col-xs-2">Gaji</label>
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-addon">Rp.</div>
-              <input type="number" class="form-control" id="inputGaji" placeholder="Gaji" ng-model="gaji">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="inputNPWP" class="control-label col-xs-4">Status Tanggungan
+              <i class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" data-html=true data-container="body"
+                title="Peraturan Menteri Keuangan nomor: PMK-196/PMK.011/2012 tentang penyesuaian besarnya PTKP. Peraturan ini berlaku definitif mulai 1 Januari 2013."></i>
+            </label>
+            <div class="col-sm-8">
+              <select class="form-control" ng-model="ptkp" ng-options="status.name for status in ptkp_list track by status.value">
+              </select>
             </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="inputTHR" class="control-label col-xs-2">THR</label>
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-addon">Rp.</div>
-              <input type="number" class="form-control" id="inputTHR" placeholder="THR" ng-model="thr">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="inputGaji" class="control-label col-xs-4">Gaji/Bulan</label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <div class="input-group-addon">Rp.</div>
+                <input type="number" class="form-control" id="inputGaji" placeholder="Gaji" ng-model="gaji">
+              </div>
             </div>
           </div>
         </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="inputTHR" class="control-label col-xs-4">THR</label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <div class="input-group-addon">Rp.</div>
+                <input type="number" class="form-control" id="inputTHR" placeholder="THR" ng-model="thr">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="clearfix"></div>
 
         <hr>
-        <h3>Rincian</h3>
+        <div class="row">
+          <div class="col-sm-6">
+            <h3>Rincian</h3>
 
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Gaji:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{gaji | currency:'':0}}</p>
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Gaji:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{gaji | currency:'':0}}</p>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Gaji/Tahun:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{gaji_per_tahun() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">THR:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{thr | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Tanggungan:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{ptkp.value | currency:'':0}}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <h3>Kesimpulan:</h3>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Pajak/Tahun:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{total_pph() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Pajak/Bulan:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{total_pph_per_bulan() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Gaji Setelah PPh/Tahun:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{total_gaji() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Gaji Setelah PPh/Bulan:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static label label-success">{{total_gaji_per_bulan() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Ratio (pajak : gaji) :</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{ratio()}}</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Gaji/Tahun:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{gaji_per_tahun() | currency:'':0}}</p>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">THR:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{thr | currency:'':0}}</p>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Tanggungan:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{ptkp | currency:'':0}}</p>
-          </div>
-        </div>
-
+          
         <hr>
-        <h3>Perhitungan:</h3>
+        <div class="row">
+          <div class="col-sm-6">
+            <h3>Perhitungan:</h3>
 
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Bruto:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{bruto() | currency:'':0}}</p>
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Bruto:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{bruto() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Biaya Jabatan:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{biaya_jabatan() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Netto:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{netto() | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">PTKP:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{ptkp.value | currency:'':0}}</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">PKP:</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{pkp() | currency:'':0}}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <h3>PPh Terhutang:</h3>
+            
+            <div class="form-group" ng-repeat="value in pph track by $index">
+              <label for="inputEmail3" class="col-sm-4 control-label">{{$index + 1}}. ({{npwp_list[npwp][$index].value * 100}}%):</label>
+              <div class="col-sm-8">
+                <p class="form-control-static">{{value | currency:'':0}}</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Biaya Jabatan:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{biaya_jabatan() | currency:'':0}}</p>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Netto:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{netto() | currency:'':0}}</p>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">PTKP:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{ptkp | currency:'':0}}</p>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">PKP:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{pkp() | currency:'':0}}</p>
-          </div>
-        </div>
-
-        <hr>
-        <h3>PPH Terhutang:</h3>
-
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">1:</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">{{pph_1() | currency:'':0}}</p>
-          </div>
-        </div>
-
-        {{npwp_list[npwp][0]}}
-
       </form>
     </div>
   </div>
