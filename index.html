@@ -177,7 +177,7 @@
       <form class="form-horizontal">
         <div class="col-sm-6">
           <div class="form-group">
-            <label for="inputNPWP" class="control-label col-xs-4">NPWP
+            <label for="inputNPWP" class="control-label col-sm-4">NPWP
               <i class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" data-html=true data-container="body"
                 title="
                 <h5>Sesuai dengan Pasal 17 ayat 1 huruf a, UU Pajak Penghasilan.</h5>
@@ -203,7 +203,7 @@
         </div>
         <div class="col-sm-6">
           <div class="form-group">
-            <label for="inputNPWP" class="control-label col-xs-4">Status Tanggungan
+            <label for="inputNPWP" class="control-label col-sm-4">Status Tanggungan
               <i class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" data-html=true data-container="body"
                 title="Peraturan Menteri Keuangan nomor: PMK-196/PMK.011/2012 tentang penyesuaian besarnya PTKP. Peraturan ini berlaku definitif mulai 1 Januari 2013."></i>
             </label>
@@ -215,7 +215,7 @@
         </div>
         <div class="col-sm-6">
           <div class="form-group">
-            <label for="inputGaji" class="control-label col-xs-4">Gaji/Bulan</label>
+            <label for="inputGaji" class="control-label col-sm-4">Gaji/Bulan</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <div class="input-group-addon">Rp.</div>
@@ -226,7 +226,7 @@
         </div>
         <div class="col-sm-6">
           <div class="form-group">
-            <label for="inputTHR" class="control-label col-xs-4">THR</label>
+            <label for="inputTHR" class="control-label col-sm-4">THR</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <div class="input-group-addon">Rp.</div>
@@ -240,124 +240,147 @@
         <hr>
         <div class="row">
           <div class="col-sm-6">
-            <h3>Rincian</h3>
+            <div class="panel panel-primary">
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Gaji:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{gaji | currency:'':0}}</p>
+              <div class="panel-heading">
+                <strong>Kesimpulan:</strong>
               </div>
-            </div>
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Gaji/Tahun:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{gaji_per_tahun() | currency:'':0}}</p>
-              </div>
-            </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">THR:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{thr | currency:'':0}}</p>
-              </div>
-            </div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Pajak/Tahun:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{total_pph() | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Tanggungan:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{ptkp.value | currency:'':0}}</p>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Pajak/Bulan:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{total_pph_per_bulan() | currency:'':0}}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Gaji Setelah PPh/Tahun:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{total_gaji() | currency:'':0}}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Gaji Setelah PPh/Bulan:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static label label-success" style="font-size: 120%; line-height: 3;">{{total_gaji_per_bulan() | currency:'':0}}</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Ratio (pajak : gaji) :</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{ratio()}}</p>
+                  </div>
+                </div>
               </div>
+
             </div>
           </div>
-
+          
           <div class="col-sm-6">
-            <h3>Kesimpulan:</h3>
-
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Pajak/Tahun:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{total_pph() | currency:'':0}}</p>
+            <div class="panel panel-default">
+              
+              <div class="panel-heading">
+                <strong>Rincian</strong>
               </div>
-            </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Pajak/Bulan:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{total_pph_per_bulan() | currency:'':0}}</p>
-              </div>
-            </div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Gaji:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{gaji | currency:'':0}}</p>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Gaji/Tahun:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{gaji_per_tahun() | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Gaji Setelah PPh/Tahun:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{total_gaji() | currency:'':0}}</p>
-              </div>
-            </div>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">THR:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{thr | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Gaji Setelah PPh/Bulan:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static label label-success">{{total_gaji_per_bulan() | currency:'':0}}</p>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Tanggungan:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{ptkp.value | currency:'':0}}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Ratio (pajak : gaji) :</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{ratio()}}</p>
-              </div>
+  
             </div>
           </div>
+
         </div>
           
         <hr>
         <div class="row">
           <div class="col-sm-6">
-            <h3>Perhitungan:</h3>
+            <div class="panel panel-default">
+              <div class="panel-heading"><strong>Perhitungan:</strong></div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Bruto:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{bruto() | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Bruto:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{bruto() | currency:'':0}}</p>
-              </div>
-            </div>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Biaya Jabatan:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{biaya_jabatan() | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Biaya Jabatan:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{biaya_jabatan() | currency:'':0}}</p>
-              </div>
-            </div>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">Netto:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{netto() | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Netto:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{netto() | currency:'':0}}</p>
-              </div>
-            </div>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">PTKP:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{ptkp.value | currency:'':0}}</p>
+                  </div>
+                </div>
 
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">PTKP:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{ptkp.value | currency:'':0}}</p>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">PKP:</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{pkp() | currency:'':0}}</p>
+                <div class="form-group">
+                  <label for="inputEmail3" class="col-sm-4 control-label">PKP:</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{pkp() | currency:'':0}}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="col-sm-6">
-            <h3>PPh Terhutang:</h3>
-            
-            <div class="form-group" ng-repeat="value in pph track by $index">
-              <label for="inputEmail3" class="col-sm-4 control-label">{{$index + 1}}. ({{npwp_list[npwp][$index].value * 100}}%):</label>
-              <div class="col-sm-8">
-                <p class="form-control-static">{{value | currency:'':0}}</p>
+            <div class="panel panel-default">
+              <div class="panel-heading"><strong>PPh Terhutang:</strong></div>
+              <div class="panel-body">
+                <div class="form-group" ng-repeat="value in pph track by $index">
+                  <label for="inputEmail3" class="col-sm-4 control-label">{{$index + 1}}. ({{npwp_list[npwp][$index].value * 100}}%):</label>
+                  <div class="col-sm-8">
+                    <p class="form-control-static">{{value | currency:'':0}}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -365,5 +388,14 @@
       </form>
     </div>
   </div>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-56492856-2', 'auto');
+    ga('send', 'pageview');
+  </script>
 </body>
 </html>
